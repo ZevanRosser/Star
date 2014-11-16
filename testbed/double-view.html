@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Basics</title>
+    <script src="../star.js"></script>
+    <script>
+      window.addEventListener('load', function() {
+        
+        var data = {
+          title : 'Some Title',
+          txt : '000'
+        };
+        
+        var model = new Star.Object(data),
+            tmpl1 = new Star.View(document.getElementById('tmpl1').innerHTML, model),
+            tmpl2 = new Star.View(document.getElementById('tmpl2').innerHTML, model);
+        
+        document.body.appendChild(tmpl1.el);
+        document.body.appendChild(tmpl2.el);
+        
+        var str = '', 
+            num = 0, 
+            numDest = 0;
+        
+        setInterval(function() {
+          if (Math.random() < 0.1){
+            numDest = parseFloat(Math.random() * 40); 
+          }
+          num += (numDest - num) / 12;
+          str = '';
+          for (var i = 0; i < num; i++){
+            str += '0';
+          }
+          model.$txt(str);
+        }, 30);
+
+      });
+    </script>
+    <style>
+      body{
+        font-family : sans-serif; 
+      }
+      .h-bar{
+        position : relative;
+        color : gray; 
+      }
+      .green{
+        color : green; 
+      }
+      .blue {
+        color : blue; 
+      }
+    </style>
+  </head>
+  <body>
+    
+    <script id="tmpl1" type="text/html">
+      <h2>*title</h2>
+      <div class="h-bar green">*txt</div>
+    </script>
+    
+    <script id="tmpl2" type="text/html">
+      <h4>*title</h4>
+      <div class="h-bar blue">*txt</div>
+    </script>
+  </body>
+</html>
