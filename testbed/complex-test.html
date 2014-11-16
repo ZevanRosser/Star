@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="../template.js"></script>
+    <script src="../watch.js"></script>
+    <script>
+      window.addEventListener('load', function() {
+        
+        var data = {
+          title : '*Star',
+          titleStyle : 'color : red',
+          some : { 
+            nested : {
+              prop : 'I am a nested string'
+            }
+          },
+          checked : false,
+          items : [
+            {value : 1},
+            {value : 2},
+            {value : 3}
+          ], 
+          files : [
+            {id : 123, fileName : 'one'},
+            {id : 321, fileName : 'two'},
+            {id : 111, fileName : 'three'},
+            {id : 222, fileName : 'four'}
+          ],
+          names : [
+            'Jane',
+            'Joe',
+            'Abe'
+          ],
+          collection : [
+            { title : 'first', 
+              things : [
+                {thing : 'thing 1'},
+                {thing : 'thing 2'},
+                {thing : 'thing 3'}
+              ]
+             },
+            { title : 'second', 
+              things : [
+                {thing : 'thing a'},
+                {thing : 'thing b'},
+                {thing : 'thing c'}
+              ]
+             }
+          ]
+        };
+        
+        var w = new Watch(data),
+            template = new Template(document.getElementById('tmpl').innerHTML, w.data);
+        
+        document.body.appendChild(template.el);
+        
+        w.data.$checked('checked');
+        
+        // wip, properties/attributes
+        setTimeout(function() {
+          w.data.$checked(false);
+        }, 1000);
+        
+        setTimeout(function() {
+          w.data.$checked(true);
+        }, 2000);
+        
+        w.data.items[0].$value(0); 
+        w.data.items.$remove(1);
+        w.data.items.$push({value : 'some item!'});
+        
+        w.data.names.$push('David');
+        
+        w.data.collection.$unshift({ 
+          title : 'unshifted', 
+          things : [
+            {thing : 'thing a'},
+            {thing : 'thing b'},
+            {thing : 'thing c'},
+            {thing : 'thing d'}
+          ]
+        });
+        
+        w.data.collection[0].things.$push({thing : 'thing 5'});
+        w.data.collection[1].things.$push({thing : 'thing 4'});
+        
+      });
+    </script>
+    <style>
+      body,html{
+        font-family : sans-serif; 
+        font-size : 9px;
+      }
+      .thing{
+        border : 1px solid red; 
+        padding : 5px;
+      }
+    </style>
+  </head>
+  <body> 
+    <script id="tmpl" type="text/html">
+      <div class="app">
+        
+        <h2 style="*titleStyle">*title</h2>
+        
+        <p>*some.nested.prop</p>
+        
+        <form>
+          <input type="checkbox" checked="*checked">
+        </form>
+        
+        <ul data--="items">
+          <li>*value</li>
+        </ul>
+        
+        <h3>Files:</h3><hr>
+        <select data--="files">
+          <option value="*id">*fileName</option>
+        </select>
+        
+        <h3>Names:</h3><hr>
+        <div data--="names">
+          <b>*</b>
+          <div class="name">*</div>
+        </div>
+        
+        <h3>Things:</h3><hr>
+        <div data--="collection">
+          <div class='thing'>
+            <h2>*title</h2>
+            <div data--="things">
+              <p>*thing</p>
+            </div>
+          </div>
+        </div>
+        
+      </div> 
+    </script>
+  </body>
+</html>
