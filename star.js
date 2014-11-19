@@ -39,7 +39,7 @@
     var parent = this,
         child, 
         Surrogate;
-
+    
     if (protoProps && has(protoProps, 'constructor')) {
       child = protoProps.constructor;
     } else {
@@ -53,49 +53,90 @@
     child.prototype = new Surrogate;
     
     if (protoProps) Star.extend(child.prototype, protoProps);
- 
+    
     child.prototype.sup = parent.prototype
-    
-    return child;
+      
+      return child;
   };
   
-  Star.Demo = function() {
-    console.log('demo constructor');
-    this.init.apply(this, arguments);
-  };
+  Star.Events = function() {};
   
-  Star.Demo.prototype = {
-    
-    constructor : Star.Demo,
-    
-    init : function() {
-      console.log('init!');
+  Star.Events.prototype = {
+    constructor : Star.Events,
+    _makeListeners: function() {
+      this._listeners = this._listeners || [];
     },
     
-    method : function() {
-      console.log('method');
-    }
+    trigger: function(type, data) {
+      this._makeListeners();
+      var leng = this._listeners.length;
+      for (var i = 0; i < leng; i++) {
+        var listener = this._listeners[i];
+        if (listener === undefined) continue;
+          if (listener.type === type) {
+            listener.callback.call(listener.ctx || this, data);
+          }
+      }
+      return this;
+    },
     
+    on: function(type, callback, ctx) {
+      this._makeListeners();
+      this._listeners.push({
+        type: type,
+        callback: callback,
+        ctx: ctx
+      });
+      return this;
+    },
+    
+    off: function(type, callback) {
+      this._makeListeners();
+      for (var i = 0; i < this._listeners.length; i++) {
+        var listener = this._listeners[i];
+        if (listener === undefined) continue;
+          
+          if (listener.type === type && 
+              (listener.callback === callback || 
+               callback === undefined)) {
+            this._listeners.splice(i, 1);
+          }
+      }
+      return this;
+    },
+    allOff: function() {
+      this._listeners = [];
+      return this;
+    }
   };
   
-  Star.Demo.extend = extend;
   
-  Star.View = function(html, data) {
+  Star.View = function(attrs) {
+    
+    attrs = attrs || {};   
+    Star.extend(this, attrs);
+    
     var div = document.createElement('div');
     
     this.isVar = /\s?^\*+/;
     this.isCollection = /^data--/;
     
-    div.innerHTML = html;
+    div.innerHTML = this.template;
     
-    this.traverse(div, data);
+    this.traverse(div, this.model.data || this.model);
     
     this.el = div;
+    
+    this.init.apply(this, arguments);
   };
   
+  Star.View.extend = extend;
   
   Star.View.prototype = {
     constructor : Star.View,
+    
+    init : function() {},
+    
     appendToCollection : function(node, tempEl, scope){
       var collectionItem = document.createElement('div');
       collectionItem.innerHTML = tempEl.innerHTML;
@@ -106,6 +147,7 @@
         node.appendChild(collectionItem.childNodes[0]);
       }
     },
+    
     prependToCollection : function(node, tempEl, scope){
       var collectionItem = document.createElement('div');
       collectionItem.innerHTML = tempEl.innerHTML;
@@ -116,6 +158,7 @@
         node.insertBefore(collectionItem.childNodes[0], node.firstChild);
       }
     },
+    
     resolveVar : function(path, ctx, node, type){
       var curr;
       if (path === '*'){
@@ -213,16 +256,32 @@
         } else {
           this.traverse(node, scope);
         }
+        
       }
     }
   };
+  
+  Star.Model = function(attrs){
+    attrs = attrs || {};
+    var data = attrs.data || this.data || {};
+    this.data = new Star.Object(data);
+    delete attrs.data;
+    Star.extend(this, attrs);
+    this.init.apply(this, arguments);
+  };
+  
+  Star.Model.extend = extend;
   
   Star.Object = function(data) {
     return this.process(data);
   };
   
   Star.Object.prototype = {
+    
     constructor : Star.Object,
+    
+    init : function() {},
+    
     process : function(obj, keyPath) {
       var i, j, path, 
           temp,

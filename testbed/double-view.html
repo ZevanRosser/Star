@@ -13,8 +13,16 @@
         };
         
         var model = new Star.Object(data),
-            tmpl1 = new Star.View(document.getElementById('tmpl1').innerHTML, model),
-            tmpl2 = new Star.View(document.getElementById('tmpl2').innerHTML, model);
+            
+            tmpl1 = new Star.View({
+              template : document.getElementById('tmpl1').innerHTML,
+              model : model
+            }),
+            
+            tmpl2 = new Star.View({
+              template : document.getElementById('tmpl2').innerHTML,
+              model : model
+            });
         
         document.body.appendChild(tmpl1.el);
         document.body.appendChild(tmpl2.el);
@@ -34,7 +42,7 @@
           }
           model.$txt(str);
         }, 30);
-
+        
       });
     </script>
     <style>
