@@ -86,6 +86,8 @@
         w.data.collection[0].things.$push({thing : 'thing 5'});
         w.data.collection[1].things.$push({thing : 'thing 4'});
         
+        
+        document.getElementById('head').innerHTML = 0;
       });
     </script>
     <style>
@@ -103,7 +105,7 @@
     <script id="tmpl" type="text/html">
       <div class="app">
         
-        <h2 style="*titleStyle">*title</h2>
+        <h2 style="*titleStyle" id="head">*title</h2>
         
         <p>*some.nested.prop</p>
         

@@ -40,6 +40,14 @@
     return obj != null && hasOwnProperty.call(obj, key);
   };
   
+  var bindAll = function(obj, scope) {
+    for (var i in obj){
+      if(typeof obj[i] === 'function') {
+        obj[i] = obj[i].bind(scope);
+      }
+    }
+  };
+  
   // from backbone
   var extend = function(protoProps, staticProps) {
     var parent = this,
@@ -58,11 +66,14 @@
     Surrogate.prototype = parent.prototype;
     child.prototype = new Surrogate;
     
-    if (protoProps) Star.extend(child.prototype, protoProps);
-    
-    child.prototype.sup = parent.prototype
+    if (protoProps) {
+      Star.extend(child.prototype, protoProps);
       
-      return child;
+      
+    }
+    child.prototype.sup = parent.prototype;
+    
+    return child;
   };
   
   Star.Events = function() {};
@@ -118,20 +129,30 @@
   
   
   Star.View = function(attrs) {
-    
-    attrs = attrs || {};   
-    Star.extend(this, attrs);
-    
-    var div = document.createElement('div');
+    var wrap;
     
     this.isVar = /\s?^\*+/;
     this.isCollection = /^data--/;
+    this.boundEls = [];
     
-    div.innerHTML = this.template;
+    attrs = attrs || {};  
     
-    this.traverse(div, this.model.data || this.model);
     
-    this.el = div;
+    Star.extend(this, attrs);
+    
+    bindAll(this, this);
+    
+    
+    if (typeof this.template === 'string'){
+      wrap = document.createElement('div');
+      wrap.innerHTML = this.template;
+    } else {
+      wrap = this.template;
+    }
+    
+    this.traverse(wrap, this.model.data || this.model);
+    
+    this.el = wrap;
     
     this.init.apply(this, arguments);
   };
@@ -143,24 +164,75 @@
     
     init : function() {},
     
-    appendToCollection : function(node, tempEl, scope){
+    modelOf : function(el) {
+      
+      for (var i = 0; i < this.boundEls.length; i++){
+        var node = this.boundEls[i].node;
+        var model = this.boundEls[i].model;
+        //var coll = this.boundEls[i].collection;
+        if (el === node) {
+          console.log(this.boundEls[i]);
+          return model;
+        } else {
+          if (node.contains(el)) {
+            return model; 
+          } 
+        }
+      }
+      
+    },
+    
+    ripOut : function(el) {
+      for (var i = 0; i < this.boundEls.length; i++){
+        var node = this.boundEls[i].node;
+        var model = this.boundEls[i].model;
+        var coll = this.boundEls[i].collection;
+        
+      console.log('index', coll);
+        if (el === node) {
+          console.log('i am the node');
+        } else {
+          if (node.contains(el)) {
+            //console.log('found it', node, model, coll);
+            //coll.$remove(model);
+            console.log(model);
+            node.parentNode.removeChild(node);
+            coll.$remove(coll.$getIndexOf(model));
+          } 
+        }
+      }
+      
+    },
+    
+    appendToCollection : function(node, tempEl, scope, collection){
       var collectionItem = document.createElement('div');
       collectionItem.innerHTML = tempEl.innerHTML;
       
       this.traverse(collectionItem, scope);
       
       while(collectionItem.childNodes.length) {
+        //collectionItem.childNodes[0].$model = scope;
+        this.boundEls.push({
+          node : collectionItem.childNodes[0], 
+          model : scope,
+          collection : collection
+        });
         node.appendChild(collectionItem.childNodes[0]);
       }
     },
     
-    prependToCollection : function(node, tempEl, scope){
+    prependToCollection : function(node, tempEl, scope, collection){
       var collectionItem = document.createElement('div');
       collectionItem.innerHTML = tempEl.innerHTML;
       
       this.traverse(collectionItem, scope);
       
       while(collectionItem.childNodes.length) { 
+         this.boundEls.push({
+          node : collectionItem.childNodes[0], 
+          model : scope,
+          collection : collection
+        });
         node.insertBefore(collectionItem.childNodes[0], node.firstChild);
       }
     },
@@ -178,12 +250,14 @@
             var obj = curr['$' + path[i]];
             if (obj) {
               obj.$bindsTo.push({node : node, type : type});
+              //node.$model = obj;
+              this.boundEls.push({node : node, model : ctx});
             }
           }
           curr = curr[path[i]];
         }
-        
-        if (curr) {
+        // temporary solution
+        if (curr || curr === 0) {
           return curr;
         } else {
           return false;
@@ -193,6 +267,7 @@
     
     traverse : function(parent, scope){
       var i, j, k, 
+          id,
           attr, 
           val, 
           varValue, 
@@ -201,7 +276,22 @@
           collection, 
           collectionItem;
       
+      
+      
+      
       if (parent.attributes) {
+        
+        // optional
+        id = parent.getAttribute('id');
+        if (id != null){
+          id = id.split('-');
+          for (var i = 1; i < id.length; i++){
+            id[i] = id[i].charAt(0).toUpperCase() +  id[i].slice(1);
+          }
+          id = id.join('');
+          this[id] = parent;
+        }
+        
         for (i = 0; i < parent.attributes.length; i++){
           attr = parent.attributes[i];
           if (attr.value.match(this.isVar)){ 
@@ -219,7 +309,8 @@
       
       if (parent.innerHTML.match(this.isVar)){
         varValue = this.resolveVar(parent.innerHTML, scope, parent, 'html');
-        if (varValue){
+        // temporary solution
+        if (varValue || varValue === 0){
           parent.innerHTML = varValue; 
         } 
         return;
@@ -247,7 +338,7 @@
                 collection._prep = this.prependToCollection.bind(this);
                 
                 for (var k = 0; k < collection.length; k++){
-                  this.appendToCollection(node, tempEl, collection[k]);
+                  this.appendToCollection(node, tempEl, collection[k], collection);
                 }
                 
               }  
@@ -268,15 +359,29 @@
   };
   
   Star.Model = function(attrs){
+    // zevan
     attrs = attrs || {};
-    var data = attrs.data || this.data || {};
-    this.data = new Star.Object(data);
-    delete attrs.data;
     Star.extend(this, attrs);
+    
     this.init.apply(this, arguments);
+    
+    this.data = new Star.Object(this.data);
+    
+    console.log(this.data, 'z');
+
+    bindAll(this, this);
+    
+    
   };
   
   Star.Model.extend = extend;
+  
+  Star.Model.prototype = {
+    constructor : Star.Model,
+    $data : function() { 
+      this.data = new Star.Object(this.data);
+    }
+  };
   
   Star.Object = function(data) {
     return this.process(data);
@@ -322,19 +427,42 @@
               
               collection.$parents = [];
               
+              collection.$getIndexOf = function(obj) {
+                self = temp[key];
+                for (var i = 0; i < self.length; i++){
+                  if (self[i] === obj){
+                   return i;
+                  } 
+                }
+                return null;
+              };
+              
               collection.$remove = function(index, num) {
+                
                 var els, el, boundTo, node;
                 self = temp[key];
-                els = self.splice(index, 1 || num);
-                for (i = 0; i < els.length; i++){
-                  el = els[i];
-                  for ($prop in el){
-                    boundTo = el[$prop].$bindsTo;
-                    if (boundTo) {
-                      for (j = 0; j < boundTo.length; j++){
-                        node = boundTo[j].node;
-                        if (node.parentNode){
-                          node.parentNode.removeChild(node); 
+                
+                if (isObject(index)){
+                  console.log('remove', index, 'what?');
+                  for (i = 0; i < self.length; i++){
+                    if (self[i] === index){
+                      
+                    }
+                  }
+                } else {
+                  
+                  
+                  els = self.splice(index, 1 || num);
+                  for (i = 0; i < els.length; i++){
+                    el = els[i];
+                    for ($prop in el){
+                      boundTo = el[$prop].$bindsTo;
+                      if (boundTo) {
+                        for (j = 0; j < boundTo.length; j++){
+                          node = boundTo[j].node;
+                          if (node.parentNode){
+                            node.parentNode.removeChild(node); 
+                          }
                         }
                       }
                     }
@@ -350,7 +478,7 @@
                 
                 var leng = self.$parents.length;
                 for (i = 0; i < leng; i++){
-                  self._add(self.$parents[i], self.$tmpl, val);
+                  self._add(self.$parents[i], self.$tmpl, val, self);
                 }
               };
               
@@ -361,7 +489,7 @@
                 
                 var leng = self.$parents.length;
                 for (i = 0; i < leng; i++){
-                  self._prep(self.$parents[i], self.$tmpl, val);
+                  self._prep(self.$parents[i], self.$tmpl, val, self);
                 }
               };
               
@@ -372,8 +500,11 @@
                 temp[key] = val;
                 bindsTo = self.$bindsTo;
                 
+                
+                console.log(val, key, bindsTo);
                 for (i = 0; i < bindsTo.length; i++){ 
                   boundData = bindsTo[i];
+                  
                   if (boundData.type === 'html'){
                     boundData.node.innerHTML = val; 
                   } else {
