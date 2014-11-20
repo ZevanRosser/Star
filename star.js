@@ -171,7 +171,7 @@
         var model = this.boundEls[i].model;
         //var coll = this.boundEls[i].collection;
         if (el === node) {
-          console.log(this.boundEls[i]);
+          //console.log(this.boundEls[i]);
           return model;
         } else {
           if (node.contains(el)) {
@@ -188,14 +188,14 @@
         var model = this.boundEls[i].model;
         var coll = this.boundEls[i].collection;
         
-      console.log('index', coll);
+      //console.log('index', coll);
         if (el === node) {
-          console.log('i am the node');
+          //console.log('i am the node');
         } else {
           if (node.contains(el)) {
-            //console.log('found it', node, model, coll);
+            ////console.log('found it', node, model, coll);
             //coll.$remove(model);
-            console.log(model);
+            //console.log(model);
             node.parentNode.removeChild(node);
             coll.$remove(coll.$getIndexOf(model));
           } 
@@ -251,7 +251,9 @@
             if (obj) {
               obj.$bindsTo.push({node : node, type : type});
               //node.$model = obj;
-              this.boundEls.push({node : node, model : ctx});
+              this.boundEls.push({node : node, model : ctx, 
+                                  collection : ctx});
+              console.log('c', ctx);
             }
           }
           curr = curr[path[i]];
@@ -290,6 +292,8 @@
           }
           id = id.join('');
           this[id] = parent;
+          // not sure
+          if (window.jQuery) this['$' + id] = jQuery(parent);
         }
         
         for (i = 0; i < parent.attributes.length; i++){
@@ -359,15 +363,20 @@
   };
   
   Star.Model = function(attrs){
-    // zevan
+    
     attrs = attrs || {};
     Star.extend(this, attrs);
     
+     
+    
     this.init.apply(this, arguments);
+    
+     //console.log(this.data);
+    
     
     this.data = new Star.Object(this.data);
     
-    console.log(this.data, 'z');
+    
 
     bindAll(this, this);
     
@@ -443,7 +452,7 @@
                 self = temp[key];
                 
                 if (isObject(index)){
-                  console.log('remove', index, 'what?');
+                  //console.log('remove', index, 'what?');
                   for (i = 0; i < self.length; i++){
                     if (self[i] === index){
                       
@@ -501,7 +510,7 @@
                 bindsTo = self.$bindsTo;
                 
                 
-                console.log(val, key, bindsTo);
+                //console.log(val, key, bindsTo);
                 for (i = 0; i < bindsTo.length; i++){ 
                   boundData = bindsTo[i];
                   
