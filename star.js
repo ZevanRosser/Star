@@ -1,6 +1,12 @@
 (function() {
   
-  window.Star = {};
+  window.Star = window.S = function(obj) {
+    if (obj.template){
+      return Star.View.extend.apply(Star.View, arguments); 
+    } else {
+      return Star.Model.extend.apply(Star.Model, arguments); 
+    }
+  };
   
   if (!Array.isArray) {
     Array.isArray = function(arg) {
