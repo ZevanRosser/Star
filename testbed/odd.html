@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title></title>
+  <script>
+  </script>
+  <style>
+  </style>
+</head>
+<body>
+ <iframe id="frame" src="complex-test.html" frameborder="1" width="500"></iframe> 
+  
+  <input type="checkbox" checked="checked">
+  
+  <script>
+  
+    var i = document.getElementById('frame').getAttribute('checked');
+    document.getElementById('frame').setAttribute('checked', true);
+    console.log(document.getElementById('frame').getAttribute('checked'));
+ 
+    
+  </script>
+</body>
+  
+</html>

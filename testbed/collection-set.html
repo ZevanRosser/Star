@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Collection Group Processing</title>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="../star.js"></script>
+    <script>
+      window.addEventListener('load', function() {
+        var data = {
+          title : 'collection group processing',
+          collection : [
+            { name : 'joe', age : 32, completed : true},
+            
+            { name : 'zevan', age : 32, completed : false}
+          ],
+          
+        };
+        
+        window.model = new Star.Object(data);
+        
+        var view = new Star.View({
+          model : model,
+          template : document.getElementById('tmpl').innerHTML,
+          
+          
+          init : function() {
+            var self = this;
+            $(document).on('click', '.zoe[type=checkbox]', function(){
+              ///console.log(this);
+              self.modelOf(this).$completed(this.checked);
+            });
+            
+            $(zooo).click(function() {
+              //console.log(this.checked);
+              model.collection.$all({completed : this.checked});
+            });
+          }
+          
+        });
+        
+        document.body.appendChild(view.el);
+        
+      
+        
+      });
+    </script>
+    <style>
+    </style>
+  </head>
+  <body>
+    <input id='zooo' type='checkbox' />
+    <script id="tmpl" type="text/html">
+      <div class="some-template">
+        <h2>*title</h2>
+        
+        <ul data--="collection">
+          <li>
+            <span>*completed</span>
+            <input id='*name' class='zoe' type="checkbox" checked="*completed">
+            <span>*name</span> : <span>*age</span>
+          </li>
+        </ul>
+      </div>
+    </script> 
+  </body>
+</html>

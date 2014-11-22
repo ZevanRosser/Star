@@ -1,5 +1,7 @@
 (function() {
   
+  
+  
   window.Star = window.S = function(obj) {
     if (obj.template){
       return Star.View.extend.apply(Star.View, arguments); 
@@ -13,6 +15,11 @@
       return Object.prototype.toString.call(arg) === '[object Array]';
     };
   }
+  
+  Star.settings = {};
+  Star.config = function(settings) {
+    Star.settings = settings;
+  };
   
   // from lodash
   var isObject = function(value) {
@@ -170,8 +177,7 @@
         var node = this.boundEls[i].node;
         var model = this.boundEls[i].model;
         //var coll = this.boundEls[i].collection;
-        if (el === node) {
-          //console.log(this.boundEls[i]);
+        if (el === node) { 
           return model;
         } else {
           if (node.contains(el)) {
@@ -188,14 +194,11 @@
         var model = this.boundEls[i].model;
         var coll = this.boundEls[i].collection;
         
-      //console.log('index', coll);
         if (el === node) {
           //console.log('i am the node');
         } else {
           if (node.contains(el)) {
-            ////console.log('found it', node, model, coll);
-            //coll.$remove(model);
-            //console.log(model);
+            
             node.parentNode.removeChild(node);
             coll.$remove(coll.$getIndexOf(model));
           } 
@@ -210,8 +213,7 @@
       
       this.traverse(collectionItem, scope);
       
-      while(collectionItem.childNodes.length) {
-        //collectionItem.childNodes[0].$model = scope;
+      while(collectionItem.childNodes.length) { 
         this.boundEls.push({
           node : collectionItem.childNodes[0], 
           model : scope,
@@ -228,7 +230,7 @@
       this.traverse(collectionItem, scope);
       
       while(collectionItem.childNodes.length) { 
-         this.boundEls.push({
+        this.boundEls.push({
           node : collectionItem.childNodes[0], 
           model : scope,
           collection : collection
@@ -248,18 +250,20 @@
         for (var i = 0; i < path.length; i++){
           if (i === path.length - 1){
             var obj = curr['$' + path[i]];
+            // console.log(ctx, path[i], curr[ path[i] ]);
             if (obj) {
               obj.$bindsTo.push({node : node, type : type});
               //node.$model = obj;
               this.boundEls.push({node : node, model : ctx, 
                                   collection : ctx});
-              console.log('c', ctx);
+              
             }
           }
           curr = curr[path[i]];
         }
         // temporary solution
-        if (curr || curr === 0) {
+        
+        if (curr || curr === 0 || curr === false) {
           return curr;
         } else {
           return false;
@@ -291,20 +295,29 @@
             id[i] = id[i].charAt(0).toUpperCase() +  id[i].slice(1);
           }
           id = id.join('');
-          this[id] = parent;
+          
           // not sure
-          if (window.jQuery) this['$' + id] = jQuery(parent);
+          if (Star.settings.jQueryIds)  {
+            this[id] = jQuery(parent);
+          } else {
+            this[id] = parent;
+          }
         }
         
         for (i = 0; i < parent.attributes.length; i++){
           attr = parent.attributes[i];
+          
           if (attr.value.match(this.isVar)){ 
             val = this.resolveVar(attr.value, scope, parent, attr.name); 
-            if (val === false || val === ''){
-              parent.attributes.removeNamedItem(attr.name);
-            } else {
-              parent.setAttribute(attr.name, val); 
-            }
+            
+          if (val === false || val === ''){
+            parent.attributes.removeNamedItem(attr.name);
+            parent[attr.name] = val;
+          } else {
+            
+            parent.setAttribute(attr.name, val); 
+          }
+            
           }
         }
       }
@@ -314,7 +327,9 @@
       if (parent.innerHTML.match(this.isVar)){
         varValue = this.resolveVar(parent.innerHTML, scope, parent, 'html');
         // temporary solution
-        if (varValue || varValue === 0){
+        
+        if (varValue === false || varValue === 0 || varValue){
+          
           parent.innerHTML = varValue; 
         } 
         return;
@@ -367,20 +382,11 @@
     attrs = attrs || {};
     Star.extend(this, attrs);
     
-     
-    
     this.init.apply(this, arguments);
-    
-     //console.log(this.data);
-    
     
     this.data = new Star.Object(this.data);
     
-    
-
     bindAll(this, this);
-    
-    
   };
   
   Star.Model.extend = extend;
@@ -430,6 +436,32 @@
               
               collection = temp[key];
               
+              collection.$count = function(values) {
+                self = temp[key];
+                var leng = self.length,
+                    count = 0;
+                for (var i = 0; i < leng; i++){
+                  for (var j in values) {
+                    if (self[i][j] === values[j]){
+                      count++;
+                    }
+                  }
+                  
+                }
+                return count;
+              };
+              
+              collection.$all = function(values) {
+                console.log('all', values);
+                self = temp[key];
+                var leng = self.length;
+                for (var i = 0; i < leng; i++){
+                  for (var j in values) {
+                    self[i]['$' + j](values[j]);
+                  }
+                }
+              };
+              
               collection.$addParent = function(parent){
                 temp[key].$parents.push(parent);
               };
@@ -440,7 +472,7 @@
                 self = temp[key];
                 for (var i = 0; i < self.length; i++){
                   if (self[i] === obj){
-                   return i;
+                    return i;
                   } 
                 }
                 return null;
@@ -451,32 +483,22 @@
                 var els, el, boundTo, node;
                 self = temp[key];
                 
-                if (isObject(index)){
-                  //console.log('remove', index, 'what?');
-                  for (i = 0; i < self.length; i++){
-                    if (self[i] === index){
-                      
-                    }
-                  }
-                } else {
-                  
-                  
-                  els = self.splice(index, 1 || num);
-                  for (i = 0; i < els.length; i++){
-                    el = els[i];
-                    for ($prop in el){
-                      boundTo = el[$prop].$bindsTo;
-                      if (boundTo) {
-                        for (j = 0; j < boundTo.length; j++){
-                          node = boundTo[j].node;
-                          if (node.parentNode){
-                            node.parentNode.removeChild(node); 
-                          }
+                els = self.splice(index, 1 || num);
+                for (i = 0; i < els.length; i++){
+                  el = els[i];
+                  for ($prop in el){
+                    boundTo = el[$prop].$bindsTo;
+                    if (boundTo) {
+                      for (j = 0; j < boundTo.length; j++){
+                        node = boundTo[j].node;
+                        if (node.parentNode){
+                          node.parentNode.removeChild(node); 
                         }
                       }
                     }
                   }
                 }
+                
                 return els;
               };
               
@@ -510,18 +532,17 @@
                 bindsTo = self.$bindsTo;
                 
                 
-                //console.log(val, key, bindsTo);
+                
                 for (i = 0; i < bindsTo.length; i++){ 
                   boundData = bindsTo[i];
                   
                   if (boundData.type === 'html'){
                     boundData.node.innerHTML = val; 
                   } else {
-                    if (val || val === 0) {
-                      boundData.node.setAttribute(boundData.type, val);
-                    } else { 
-                      boundData.node.attributes.removeNamedItem(boundData.type);
-                    }
+                    var attr = boundData.node.getAttribute(boundData.type);
+                    // flag these somehow
+                    boundData.node.setAttribute(boundData.type, val);
+                    boundData.node[boundData.type] = val;
                   }
                 }
                 

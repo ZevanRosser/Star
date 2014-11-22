@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      $(function(){
+        
+        var iter = 2000;
+        
+        var d = +new Date();
+        
+        for (var z = 0; z < iter; z++){
+          var collection = [1,2,3,4,5];
+          var self;
+          
+          collection.$count = function(values) {
+            self = temp[key];
+            var leng = self.length,
+                count = 0;
+            for (var i = 0; i < leng; i++){
+              for (var j in values) {
+                if (self[i][j] === values[j]){
+                  count++;
+                }
+              }
+              
+            }
+            return count;
+          };
+          
+          
+          
+          
+          collection.$all = function(values) {
+            //console.log('all', values);
+            self = temp[key];
+            var leng = self.length;
+            for (var i = 0; i < leng; i++){
+              for (var j in values) {
+                self[i]['$' + j](values[j]);
+              }
+            }
+          };
+          
+          collection.$addParent = function(parent){
+            temp[key].$parents.push(parent);
+          };
+          
+          collection.$parents = [];
+          
+          collection.$getIndexOf = function(obj) {
+            self = temp[key];
+            for (var i = 0; i < self.length; i++){
+              if (self[i] === obj){
+                return i;
+              } 
+            }
+            return null;
+          };
+          
+          collection.$remove = function(index, num) {
+            
+            var els, el, boundTo, node;
+            self = temp[key];
+            
+            els = self.splice(index, 1 || num);
+            for (i = 0; i < els.length; i++){
+              el = els[i];
+              for ($prop in el){
+                boundTo = el[$prop].$bindsTo;
+                if (boundTo) {
+                  for (j = 0; j < boundTo.length; j++){
+                    node = boundTo[j].node;
+                    if (node.parentNode){
+                      node.parentNode.removeChild(node); 
+                    }
+                  }
+                }
+              }
+            }
+            
+            return els;
+          };
+          
+          collection.$push = function(val) {
+            self = temp[key];
+            val = ts.process(val, path);
+            self.push(val);
+            
+            var leng = self.$parents.length;
+            for (i = 0; i < leng; i++){
+              self._add(self.$parents[i], self.$tmpl, val, self);
+            }
+          };
+          
+          collection.$unshift = function(val) {
+            self = temp[key];
+            val = ts.process(val, path);
+            self.unshift(val);
+            
+            var leng = self.$parents.length;
+            for (i = 0; i < leng; i++){
+              self._prep(self.$parents[i], self.$tmpl, val, self);
+            }
+          };
+          
+        }
+        
+        
+        console.log(+new Date() - d);
+        
+        
+        
+        
+        
+        var aa = [];
+        
+        
+        var Obo = function(arr) {
+          aa.concat.apply([], arr);
+        };
+        
+        var o = new Obo([1,2,3]);
+        
+        console.log(o);
+        
+        return;
+        
+                      //Obo.prototype = new Array();
+        
+        var d = +new Date();
+        
+        for (var z = 0; z < iter; z++){
+          var collection = new Obo([1,2,3,4,5]);
+          var self;
+          
+          
+          
+        }
+        
+        console.log(+new Date() - d);
+        
+      });
+    </script>
+    <style>
+    </style>
+  </head>
+  <body>
+    <div class="thing"></div>
+    <div class="thing"></div>
+    <div class="thing"></div>
+    <div class="thing"></div>
+  </body>
+</html>
