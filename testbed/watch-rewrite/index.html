@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="old-watch.js"></script>
+    <script>
+      window.addEventListener('load', function(){
+        
+        var obj = {
+          x : 100, 
+          y : 100,
+          vect : {a : 1, b: 2, c : 3} 
+        };
+        
+        var w = new Watch(obj);
+        
+        console.clear();
+        
+        console.log('"x" start value = ', w.data.x); 
+        
+        w.data.$x(2);
+        
+        console.log('"x" is now', w.data.x); 
+        
+        console.log('original "x" is still', obj.x);
+        
+        console.log('------Something Different------');
+        
+        console.log('"vect.a" start value = ', w.data.x); 
+        
+        w.data.vect.$a('I am a!');
+        
+        console.log(w.data.vect.a);
+        
+      });
+    </script>
+    <style>
+    </style>
+  </head>
+  <body>
+    
+  </body>
+</html>
