@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="../star.js"></script>
+    <script>
+     window.addEventListener('load', function(){
+       
+       var A = S({
+         
+         init : function() {
+           console.log('i am a');
+         }
+         
+       });
+       
+       var B = A.extend({
+         
+         init : function() {
+           console.log('i am b');
+           this.sup.init();
+         }
+         
+       }, {'static' : true});
+       
+       var b = new B();
+       console.log(B['static']);
+      
+
+
+     });
+    </script>
+    <style>
+    </style>
+  </head>
+  <body>
+
+  </body>
+</html>

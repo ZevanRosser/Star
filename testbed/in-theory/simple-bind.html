@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script>
+     window.addEventListener('load', function(){
+       var fun = function(a, b) {
+         return a + b;
+       };
+       
+       var d = +new Date(), iter = 10000;
+       
+       for (var i = 0; i < iter; i++){
+         var z = fun.bind(1);
+       }
+       
+       console.log(+new Date() - d);
+       
+       // The .bind method from Prototype.js 
+       Function.prototype.bind = function(){ 
+         var fn = this, args = Array.prototype.slice.call(arguments), object = args.shift(); 
+         return function(){ 
+           return fn.apply(object, 
+             args.concat(Array.prototype.slice.call(arguments))); 
+         }; 
+       };
+
+       var d = +new Date(), iter = 10000;
+       
+       for (var i = 0; i < iter; i++){
+         var z = fun.bind(1);
+       }
+       
+       console.log(+new Date() - d);
+       
+        var d = +new Date(), iter = 10000;
+       
+       for (var i = 0; i < iter; i++){
+         var z = function(a, b) {
+           return a + b
+         }
+       }
+       
+       console.log(+new Date() - d);
+
+     });
+    </script>
+    <style>
+    </style>
+  </head>
+  <body>
+
+  </body>
+</html>

@@ -73,11 +73,8 @@
     Surrogate.prototype = parent.prototype;
     child.prototype = new Surrogate;
     
-    if (protoProps) {
-      Star.extend(child.prototype, protoProps);
-      
-      
-    }
+    if (protoProps) Star.extend(child.prototype, protoProps);
+
     child.prototype.sup = parent.prototype;
     
     return child;
