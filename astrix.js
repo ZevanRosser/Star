@@ -1,5 +1,15 @@
 (function() {
   
+   window.Star = window.S = function(obj) {
+    if (obj.template){
+      return S.View.extend.apply(S.View, arguments); 
+    } else if (obj.data) {
+      return S.Model.extend.apply(S.Model, arguments); 
+    } else {
+      return S.O.extend.apply(S.O, arguments); 
+    }
+  }; 
+  
   if (!Array.isArray) {
     Array.isArray = function(arg) {
       return Object.prototype.toString.call(arg) === '[object Array]';
@@ -56,30 +66,18 @@
     
     return child;
   };
-  
-  window.Star = window.S = function(obj) {
-    if (obj.template){
-      return Star.View.extend.apply(Star.View, arguments); 
-    } else {
-      return Star.Model.extend.apply(Star.Model, arguments); 
-    } else {
-      var O = function() {
-        obj.init.apply(this, arguments); 
-      };
-      O.prototype = obj;
-      O.constructor = O;
-    }
-  }; 
-   
+ 
   S.Collection = function(){};
   
-  S.Object = function() {};
-  S.Model.extend = extend;
-  S.Model.prototype = {
+  S.O = function() {
+    this.init.apply(this, arguments);
+  };
+  S.O.extend = extend;
+  S.O.prototype = {
     constructor : S.Model
   };
-  S.Model.extend = extend;
-  
+  S.O.extend = extend;
+   
   S.Model = function() {};
   S.Model.extend = extend;
   S.Model.prototype = {
