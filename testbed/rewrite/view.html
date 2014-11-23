@@ -47,9 +47,11 @@
          model : m
        });
        
+        
+       
        document.body.appendChild(v.el);
        
-       
+       console.log('p',document.getElementById('check').checked);
 
      });
     </script>
@@ -61,7 +63,7 @@
       <h2 style="*color">*title</h2>
       <button id="btn" data-on-click="onClick">click me</button>
       <span>*some.nested.prop</span>
-      <input type="checkbox" checked="*checked">
+      <input id="check" type="checkbox" checked="*checked">
     </script>
   </body>
 </html>

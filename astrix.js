@@ -226,11 +226,31 @@
         
         for (i = 0; i < leng; i++){
           attr = parent.attributes[i];
-          if (isEvent.test(attr.name)){
-           parent.addEventListener(attr.name.replace('data-on-',''),
-                                   function(e){
-                                     self[attr.value](parent, ctx, e);
-                                   });
+          if (attr.specified) {
+            
+            if (isEvent.test(attr.name)){
+              parent.addEventListener(
+                attr.name.replace('data-on-',''),
+                function(e){
+                  self[attr.value](parent, ctx, e);
+                }
+              );
+            } else if (attr.value.match(this.isVar)){ 
+              
+              val = this.resolve(attr.value, ctx, parent, attr.name); 
+              
+              if (val != null){
+                // needs work
+                
+                if (attr.name != 'style' && parent[attr.name] != null) {
+                  parent[attr.name] = val;
+                } else {
+                  parent.setAttribute(attr.name, val);
+                }
+              }
+              
+            }
+            
           }
         }
         

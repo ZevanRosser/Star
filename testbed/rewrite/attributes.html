@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      $(function(){
+        
+        var elem = document.getElementById('elem');
+        for (var i = 0; i < elem.attributes.length; i++) {
+          var attrib = elem.attributes[i];
+          if (attrib.specified) {
+            $("body").append(attrib.name + " = " + attrib.value + "<br/>");
+          }
+        }
+        
+        
+        
+      });
+    </script>
+    <style>
+    </style>
+  </head>
+  <body>
+    <input type="checkbox" id="elem" checked><br/>
+  </body>
+</html>
