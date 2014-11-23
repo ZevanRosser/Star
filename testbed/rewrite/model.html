@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="../../astrix.js"></script>
+    <script>
+     window.addEventListener('load', function(){
+       
+       var Model = S({
+         data : {
+           x : 1, 
+           y : 2,
+           z : {
+             w : 100 
+           }
+         }, 
+         
+         fwing : 'z',
+         
+         init : function() {
+           console.log('model', this.data);
+         }
+       });
+       
+       var m = new Model(); 
+       
+       m.data.$x(1000);
+       
+       console.log(m.data);d
+       
+
+     });
+    </script>
+    <style>
+    </style>
+  </head>
+  <body>
+
+  </body>
+</html>
