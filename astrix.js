@@ -1,5 +1,9 @@
 (function() {
   
+  var isVar = /\s?^\*+/, 
+      isCollection = /^data--/,
+      isEvent = /^data-on-/;
+  
   window.Star = window.S = function(obj) {
     if (obj.template){
       return S.View.extend.apply(S.View, arguments); 
@@ -90,7 +94,8 @@
   };
   
   
-  S.Model = function() {
+  S.Model = function(attrs) {
+    Star.extend(this, attrs);
     this.init.apply(this, arguments);
     this.data = this.process(this.data);
   };
@@ -161,14 +166,99 @@
   };
   
   
-  S.View = function() {
+  S.View = function(attrs) {
+    
+    Star.extend(this, attrs);
+    
+    if (typeof this.template === 'string'){
+      this.el = document.createElement('div');
+      this.el.innerHTML = this.template;
+    } else {
+      this.el = this.template;
+    }
+    
+    this.traverse(this.el, this.model.data);
+    
     this.init.apply(this, arguments);
   };
   
   S.View.extend = extend;
   
   S.View.prototype = {
-    constructor : S.View
+    constructor : S.View,
+    
+    resolve : function(path, ctx, node, type) {
+      var i, leng, target;
+      if (path === '*'){
+        return ctx;
+      }else{ 
+        path = path.replace(isVar,'').split('.');
+        leng = path.length;
+        for (i = 0; i < leng; i++){
+          if (i === leng - 1){
+            var target = ctx['$' + path[i]];
+            if (target) {
+              target.$bindsTo.push({node : node, type : type}); 
+              // opt collection
+            }
+          }
+          ctx = ctx[path[i]];
+        }
+        
+        if (ctx != null) {
+          return ctx;
+        } else {
+          return undefined;
+        }
+      }
+    },
+    
+    traverse : function(parent, ctx) {
+      var i, j, k,
+          leng,
+          attr,
+          val,
+          child,
+          self = this;
+      
+      if (parent.attributes) {
+        leng = parent.attributes.length; 
+        
+        for (i = 0; i < leng; i++){
+          attr = parent.attributes[i];
+          if (isEvent.test(attr.name)){
+           parent.addEventListener(attr.name.replace('data-on-',''),
+                                   function(e){
+                                     self[attr.value](parent, ctx, e);
+                                   });
+          }
+        }
+        
+      };
+      
+      if (!parent.innerHTML) { return; }
+      
+      if (isVar.test(parent.innerHTML)){
+        
+        val = this.resolve(parent.innerHTML, ctx, parent, 'html');
+        if (val != null){
+          parent.innerHTML = val; 
+        } 
+        return undefined;
+      }
+      
+      leng = parent.childNodes.length;
+      for (i = 0; i < leng; i++){
+        child = parent.childNodes[i];
+        
+        if (child.childNodes.length > 0) {  
+          if (child.nodeType === 3){ continue; }
+          this.traverse(child, ctx);
+        } else {
+          this.traverse(child, ctx);
+        }
+      }
+    }
   };
   
   

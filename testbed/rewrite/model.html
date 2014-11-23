@@ -7,6 +7,8 @@
     <script>
      window.addEventListener('load', function(){
        
+       console.clear();
+       
        var Model = S({
          data : {
            x : 1, 
@@ -16,18 +18,21 @@
            }
          }, 
          
-         fwing : 'z',
+         fwing : 'fwing',
          
          init : function() {
            console.log('model', this.data);
          }
        });
        
-       var m = new Model(); 
+       var m = new Model({
+         someProp : 'something' 
+       }); 
        
        m.data.$x(1000);
+       console.log(m.someProp, m.fwing);
        
-       console.log(m.data);d
+       console.log(m.data);
        
 
      });
