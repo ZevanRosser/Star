@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script>
+      $(function(){
+        
+        var d = $('.dots');
+       
+        
+        var O = function( elems ) {
+          // Resetting the length to 0, then using the native Array push
+          // is a super-fast way to populate an object with array-like properties
+          this.length = 0;
+          Array.prototype.push.apply( this, elems );
+          //return this;
+        };
+        
+        O.prototype.thing = function() {
+          for (var i = 0; i < this.length; i++){
+            console.log('z', this[i]);
+          }
+        };
+        
+        var o = new O([
+          1, 
+          3, 
+          5
+        ]);
+        
+        
+        console.log(JSON.stringify(o));
+        
+        
+      });
+    </script>
+    <style>
+    </style>
+  </head>
+  <body>
+    <div class="dots"></div>
+    <div class="dots"></div>
+    <div class="dots"></div>
+  </body>
+</html>
