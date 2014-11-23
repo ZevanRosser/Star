@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script>
+     window.addEventListener('load', function(){
+       
+       var SomeView = function(){
+         
+         this.a = 'a';
+         this.b = 'b';
+         this.c = 'c';
+         
+         this.btn = document.getElementById('btn');
+         
+         var events = ['click', 'dblclick'];
+         var self = this;
+         
+         for (var i = 0; i < this.btn.attributes.length; i++){
+           var attr = this.btn.attributes[i];
+
+           if (/data-/.test(attr.name)){
+             var ev = attr.name.replace('data-','');
+             console.log(ev);
+             this.btn.addEventListener(ev, function(e) {
+               self[attr.value](self.a, self.b, self.c, e);
+             });
+           }
+         }
+         
+       };
+       
+       SomeView.prototype = {
+         
+         onClick : function(a, b, c, event) {
+           console.log(a, b, c, event);
+         }
+       };
+       
+       var view = new SomeView();
+       
+    
+
+
+     });
+    </script>
+    <style>
+    </style>
+  </head>
+  <body>
+    <button id="btn" data-click="onClick">
+      click me
+    </button>
+  </body>
+</html>

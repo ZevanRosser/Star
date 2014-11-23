@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script>
+     $(function(){
+       var iter = 10000;
+      
+       
+       var func = function(a, b, c){
+         return a + b + c;
+       };
+       
+       var d = +new Date();
+       
+       for (var i = 0; i < iter; i++){
+         var f = function(){
+           func(1, 2, 3);
+         };
+       }
+       
+       console.log(+new Date() - d);
+       
+       
+        var d = +new Date();
+       
+       for (var i = 0; i < iter; i++){
+         var f = func.bind(null, 1, 2, 3);
+       }
+       
+       console.log(+new Date() - d);
+
+
+     });
+    </script>
+    <style>
+    </style>
+  </head>
+  <body>
+
+  </body>
+</html>
